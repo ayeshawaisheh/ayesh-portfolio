@@ -242,6 +242,9 @@
       cursor: zoom-in;
       border-radius: 8px;
     }
+    .drawings-grid .span-full {
+      grid-column: 1 / -1;
+    }
     .drawings-grid .site-image-label {
       display: block;
       padding: 10px 14px;
@@ -372,6 +375,40 @@
     .reveal-card.visible {
       opacity: 1;
       transform: scale(1) rotate(0deg);
+    }
+
+    /* PROJECT 2-COL GRID */
+    .project-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 700px) {
+      .project-grid-2col { grid-template-columns: 1fr; }
+    }
+    .project-grid-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .project-grid-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: zoom-in;
+    }
+    .project-grid-2col:has(.project-grid-item:hover) .project-grid-item:not(:hover) {
+      transform: scale(0.92);
+      opacity: 0.65;
+      z-index: 0;
+    }
+    .project-grid-2col .project-grid-item:hover {
+      transform: scale(1.05);
+      z-index: 2;
     }
 
     /* HERO IMAGE */
