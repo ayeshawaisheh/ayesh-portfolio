@@ -17,10 +17,22 @@
   <div class="nav-outer">
     <nav class="pill">
       <a href="index.html#work" class="back-btn">
-        <span>←</span> <span>Portfolio</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> <span>Portfolio</span>
       </a>
       <div class="nav-project-tag mono">PROJECT 02 / 06</div>
-      <a href="water-as-a-catalyzer.html" class="nav-next-btn">Next Project →</a>
+      <a href="water-as-a-catalyzer.html" class="nav-next-btn">Next Project <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+        <svg class="sun-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle class="sun" cx="12" cy="12" r="5"/>
+          <path class="moon" d="M12 3a9 9 0 1 0 9 9c-4 0-7-3-7-7 0-1 .2-2 .7-3z"/>
+          <g class="rays">
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </g>
+        </svg>
+      </button>
     </nav>
   </div>
 
@@ -121,31 +133,31 @@
 
       <div class="drawings-grid">
         <div class="site-image">
-          <img src="composure-dwg-site.webp" alt="Site plan" class="clickable-img">
+          <img src="composure-dwg-site.webp?v=2" alt="Site plan" class="clickable-img">
           <span class="site-image-label">Site Plan — urban context and building footprint</span>
         </div>
         <div class="site-image">
-          <img src="composure-dwg-gf.webp" alt="Ground floor plan" class="clickable-img">
+          <img src="composure-dwg-gf.webp?v=2" alt="Ground floor plan" class="clickable-img">
           <span class="site-image-label">Ground Floor Plan — OSCE examination suites and lecture halls</span>
         </div>
         <div class="site-image span-full">
-          <img src="composure-dwg-1st.webp" alt="First floor plan" class="clickable-img">
+          <img src="composure-dwg-1st.webp?v=2" alt="First floor plan" class="clickable-img">
           <span class="site-image-label">First Floor Plan — upper-level circulation and program distribution</span>
         </div>
         <div class="site-image span-full">
-          <img src="composure-dwg-front.webp" alt="Front elevation" class="clickable-img">
+          <img src="composure-dwg-front.webp?v=2" alt="Front elevation" class="clickable-img">
           <span class="site-image-label">Front Elevation — main facade composition and material articulation</span>
         </div>
         <div class="site-image span-full">
-          <img src="composure-dwg-back.webp" alt="Back elevation" class="clickable-img">
+          <img src="composure-dwg-back.webp?v=2" alt="Back elevation" class="clickable-img">
           <span class="site-image-label">Back Elevation — rear facade with ramp and service access</span>
         </div>
         <div class="site-image">
-          <img src="composure-dwg-longsec.webp" alt="Longitudinal section" class="clickable-img">
+          <img src="composure-dwg-longsec.webp?v=2" alt="Longitudinal section" class="clickable-img">
           <span class="site-image-label">Longitudinal Section — spatial sequence through the building</span>
         </div>
         <div class="site-image">
-          <img src="composure-dwg-transsec.webp" alt="Transverse section" class="clickable-img">
+          <img src="composure-dwg-transsec.webp?v=2" alt="Transverse section" class="clickable-img">
           <span class="site-image-label">Transverse Section — cross-section revealing structural and volumetric relationships</span>
         </div>
       </div>
@@ -191,7 +203,7 @@
     <!-- Project Navigation Footer -->
     <div class="project-nav-footer">
       <a href="urban-weave.html" class="proj-nav-link">
-        <span class="proj-nav-label">← Previous Project</span>
+        <span class="proj-nav-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Previous Project</span>
         <span class="proj-nav-title">Project 01: The Urban Weave</span>
       </a>
 
@@ -200,7 +212,7 @@
       </a>
 
       <a href="water-as-a-catalyzer.html" class="proj-nav-link" style="text-align:right;">
-        <span class="proj-nav-label">Next Project →</span>
+        <span class="proj-nav-label">Next Project <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
         <span class="proj-nav-title">Project 03: Water as a Catalyzer</span>
       </a>
     </div>
@@ -285,6 +297,20 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
   }
 });
+</script>
+
+<script>
+(function() {
+  var btn = document.getElementById('themeToggle');
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  btn.addEventListener('click', function() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
 </script>
 
 </body>
