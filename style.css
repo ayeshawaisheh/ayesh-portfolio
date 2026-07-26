@@ -208,6 +208,7 @@
     font-family:'Inter', sans-serif; font-size:clamp(18px,2.2vw,23px); line-height:1.6; font-weight:300;
   }
   .about-lede em{color:var(--accent); font-style:normal;}
+
   .about-intro{display:flex; gap:40px; align-items:flex-start; margin:0 auto 56px; max-width:960px;}
   .about-text{flex:1; min-width:0;}
   .about-text .about-lede{text-align:center; margin:0 auto;}
@@ -262,7 +263,8 @@
   .skillbar{margin-bottom:14px;}
   .skillbar .row{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:var(--text-soft);}
   .skillbar .track{height:3px; background:var(--border); border-radius:3px;}
-  .skillbar .fill{height:3px; background:var(--accent); border-radius:3px;}
+  .skillbar .fill{height:3px; background:var(--accent); border-radius:3px; width:0; transition:width 1.2s cubic-bezier(.25,.46,.45,.94);}
+  .skillbar .fill.animate{width:var(--w);}
 
   /* ---------- WORK ---------- */
   .work-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:24px;}
