@@ -451,7 +451,7 @@
     }
     .bw { filter: grayscale(1); }
     .project-grid-2col .project-grid-item img { height:320px; object-fit:cover; }
-    .project-grid-4col .project-grid-item img { height:220px; object-fit:cover; }
+    .project-grid-4col .project-grid-item img { height:280px; object-fit:cover; }
     .project-grid-2col:has(.project-grid-item:hover) .project-grid-item:not(:hover),
     .project-grid-3col:has(.project-grid-item:hover) .project-grid-item:not(:hover),
     .project-grid-4col:has(.project-grid-item:hover) .project-grid-item:not(:hover) {
