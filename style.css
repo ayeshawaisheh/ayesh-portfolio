@@ -125,6 +125,19 @@
     background:var(--text); color:#FFFFFF; font-size:12px; font-weight:600;
     padding:8px 18px; border-radius:999px; white-space:nowrap;
   }
+  .nav-book-btn{
+    display:flex; align-items:center; gap:6px;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--text-soft);
+    border:1px solid var(--border-strong); background:var(--surface);
+    padding:7px 14px; border-radius:999px; white-space:nowrap;
+    transition:all .2s ease;
+  }
+  .nav-book-btn:hover{color:#FFFFFF; background:var(--accent); border-color:var(--accent);}
+  .nav-book-btn svg{flex:0 0 auto;}
+  @media (max-width:760px){
+    .nav-book-btn{display:none;}
+  }
   .nav-toggle{display:none; background:none; border:none; cursor:pointer; padding:4px;}
   .nav-toggle span{display:block; width:18px; height:1.5px; background:var(--text); margin:5px 0; border-radius:2px;}
   @media (max-width:760px){
@@ -169,6 +182,12 @@
     border:1px solid var(--border-strong); color:var(--text); font-size:13.5px;
     padding:14px 26px; border-radius:6px;
   }
+  .btn-book-hero{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px dashed var(--accent); color:var(--accent); font-size:13.5px; font-weight:600;
+    padding:14px 22px; border-radius:6px; transition:all .2s ease;
+  }
+  .btn-book-hero:hover{background:var(--accent); color:#FFFFFF; border-style:solid;}
   .hero-visual{
     position:relative; z-index:1; width:100%; margin-top:38px;
   }

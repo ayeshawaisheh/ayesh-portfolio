@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Flip Book | Ayesh Alawaisheh</title>
+<meta name="description" content="Digital flip book portfolio of Ayesh Ibrahim Alawaisheh, architecture student at the University of Jordan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Archivo+Expanded:wght@600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --max:1180px; --radius:10px; }
+  [data-theme="light"]{
+    --bg:#F5F5F3; --bg-soft:#EFEFEC; --surface:#FFFFFF; --surface-2:#E7E6E1;
+    --border: rgba(17,18,20,0.12); --border-strong: rgba(17,18,20,0.24);
+    --text:#131417; --text-soft:#53555A; --text-dim:#86888D;
+    --accent:#3C5568; --accent-soft: rgba(60,85,104,0.10);
+  }
+  [data-theme="dark"]{
+    --bg:#121212; --bg-soft:#1A1A1A; --surface:#1E1E1E; --surface-2:#282828;
+    --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.20);
+    --text:#F0F0F0; --text-soft:#B0B0B0; --text-dim:#787878;
+    --accent:#8AB0D6; --accent-soft: rgba(138,176,214,0.12);
+  }
+
+  body.book-body{background:var(--bg); color:var(--text);}
+  *{ box-sizing:border-box; }
+
+  .book-stage{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:96px 20px 60px; }
+  .book-header{ max-width:720px; text-align:center; margin-bottom:20px; }
+  .book-header h1{ font-family:'Archivo Expanded', sans-serif; font-size:22px; letter-spacing:-0.02em; margin:10px 0 6px; }
+  .book-header p{ font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-dim); margin:0; }
+  .book-hint{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-dim); margin-bottom:14px; text-align:center; }
+
+  /* A4 page = width:height ratio 1:1.414 (210 x 297 mm). Page dims: 490 x 693 */
+  #flipbook{ width:980px; height:693px; }
+  .stf__parent{ box-shadow:0 24px 60px rgba(0,0,0,0.20); }
+  .stf__block .stf__item{ background:var(--surface); border-radius:3px; }
+
+  /* ---------- PAGE SHELL ---------- */
+  .page{
+    width:100%; height:100%; padding:20px 22px;
+    display:flex; flex-direction:column; overflow:hidden; background:var(--surface);
+  }
+  .page--cover{ justify-content:flex-end; background:var(--accent); color:#fff; padding:26px 28px; }
+  .page--back{ justify-content:flex-end; background:var(--surface-2); padding:26px 28px; }
+  .page-mono{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:0.22em; text-transform:uppercase; }
+  .page--cover .page-mono{ opacity:0.85; }
+  .page--cover h1{ font-family:'Archivo Expanded', sans-serif; font-size:32px; line-height:1.06; margin:10px 0 8px; letter-spacing:-0.02em; }
+  .page--cover p{ font-size:12.5px; opacity:0.92; margin:0; font-weight:300; line-height:1.6; max-width:400px; }
+  .cover-num{ position:absolute; top:26px; left:28px; font-family:'IBM Plex Mono'; font-size:9px; letter-spacing:0.24em; opacity:0.7; text-transform:uppercase; }
+  .page--back .page-small{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-dim); margin-top:6px; }
+
+  .page-kicker{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .page-title{ font-family:'Archivo', sans-serif; font-weight:700; font-size:20px; letter-spacing:-0.02em; margin:0 0 8px; line-height:1.15; }
+  .page-title small{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-dim); font-weight:400; display:block; margin-bottom:3px; }
+  .page-body{ font-size:11.5px; line-height:1.55; color:var(--text-soft); font-weight:300; }
+  .page-body b,.page-body strong{ color:var(--text); font-weight:600; }
+  .page-meta{ margin-top:auto; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:4px 14px;
+    font-family:'IBM Plex Mono', monospace; font-size:8.5px; color:var(--text-dim); letter-spacing:0.04em; text-transform:uppercase; }
+  .page-meta b{ color:var(--text); font-weight:500; }
+
+  .shim{ flex:1; min-height:6px; }
+
+  /* ---------- PAGE FOOTER & PAGE NUMBER ---------- */
+  #flipbook{ counter-reset: pageNum; }
+  .page{ counter-increment: pageNum; }
+  .page-footer{
+    margin-top:14px; padding-top:10px; border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--text-dim);
+  }
+  .page-footer .foot-left{ display:flex; gap:10px; white-space:nowrap; overflow:hidden; }
+  .page-footer .foot-dot{ color:var(--accent); }
+  .page-num{ font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text-dim); letter-spacing:0.12em; }
+  .page::after{
+    content: counter(pageNum);
+    position:absolute; bottom:10px; right:12px;
+    font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text-dim);
+    letter-spacing:0.1em;
+  }
+  .page--cover::after,.page--back::after{ content:none; }
+
+  /* ---------- IMAGE VOCABULARY ---------- */
+  /* .fig = bordered frame. .contain fits whole image (drawings), .cover fills-crops (renders). */
+  .fig{ position:relative; border:1px solid var(--border); border-radius:4px; overflow:hidden; background:var(--surface-2); }
+  .fig img{ width:100%; height:100%; display:block; }
+  .fig.contain img{ object-fit:contain; }
+  .fig.cover img{ object-fit:cover; }
+  .fig.tall img{ object-fit:cover; }
+
+  /* full-width rows. .grow = expand to fill remaining vertical space. */
+  .row{ width:100%; }
+  .row.grow{ flex:1; min-height:0; }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; min-height:0; grid-auto-rows:1fr; }
+  .two .fig{ }
+  .three{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .three .fig{ aspect-ratio:4/3; }
+
+  .fig-cap{ position:absolute; left:0; right:0; bottom:0; padding:4px 9px; text-align:left;
+    font-family:'IBM Plex Mono', monospace; font-size:8px; color:#fff;
+    background:linear-gradient(transparent, rgba(0,0,0,0.7)); }
+  .tp{ font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; }
+
+  /* sized figure presets (fraction heights of the page image area) */
+  .fq{ height:92%; }
+  .fh{ height:64%; }
+  .fh2{ height:56%; }
+  .f3{ height:78%; }
+
+  /* TOC */
+  .toc{ flex:1; display:flex; flex-direction:column; gap:5px; min-height:0; margin-top:4px; }
+  .toc-row{ display:flex; align-items:baseline; gap:12px; padding:8px 10px; border:1px solid var(--border);
+    border-radius:7px; cursor:pointer; transition:all .18s ease; background:var(--surface); }
+  .toc-row:hover{ border-color:var(--accent); background:var(--accent-soft); }
+  .toc-num{ font-family:'IBM Plex Mono'; font-size:9px; color:var(--accent); width:24px; flex:0 0 auto; }
+  .toc-label{ font-family:'Archivo'; font-size:12px; font-weight:600; }
+  .toc-sub{ margin-left:auto; font-family:'IBM Plex Mono'; font-size:8px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; }
+
+  .page-list{ list-style:none; padding:0; margin:6px 0 0; display:flex; flex-direction:column; gap:6px; }
+  .page-list li{ font-size:10.5px; color:var(--text-soft); font-weight:300; padding-left:11px; position:relative; line-height:1.5; }
+  .page-list li::before{ content:"—"; position:absolute; left:0; color:var(--accent); }
+
+  /* project opener "index" strip */
+  .page-index{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px;
+    font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--text-dim); }
+  .page-index span b{ color:var(--text); font-weight:500; }
+  .opener-hero{ margin-top:12px; }
+
+  .book-controls{ margin-top:22px; display:flex; gap:12px; align-items:center; }
+  .btn-book{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+    padding:10px 18px; border-radius:8px; cursor:pointer; transition:all .2s ease; }
+  .btn-book:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn-book[disabled]{ opacity:0.35; cursor:default; }
+  .btn-book[disabled]:hover{ background:var(--surface); border-color:var(--border-strong); color:var(--text); }
+
+  .book-close{ position:fixed; top:20px; left:20px; z-index:60; display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-soft); border:1px solid var(--border); background:var(--surface);
+    padding:9px 14px; border-radius:8px; cursor:pointer; transition:all .2s ease; }
+  .book-close:hover{ color:var(--text); border-color:var(--border-strong); }
+  .book-theme{ position:fixed; top:20px; right:20px; z-index:60; display:flex; align-items:center; justify-content:center;
+    color:var(--text-soft); border:1px solid var(--border); background:var(--surface);
+    padding:9px; border-radius:8px; cursor:pointer; transition:all .2s ease; }
+  .book-theme:hover{ color:var(--text); border-color:var(--border-strong); }
+  .moon{ opacity:0; }
+  [data-theme="dark"] .sun-moon{ transform:rotate(90deg); }
+  [data-theme="dark"] .sun{ opacity:0; }
+  [data-theme="dark"] .rays{ opacity:0; }
+  [data-theme="dark"] .moon{ opacity:1; }
+
+  @media (max-width:1020px){
+    #flipbook{ width:92vw; height:65vw; }
+    .page{ padding:16px 18px; } .page--cover h1{ font-size:24px; }
+  }
+  @media (max-width:700px){
+    #flipbook{ width:96vw; height:68vw; }
+    .page{ padding:12px 14px; } .page--cover h1{ font-size:19px; } .page-title{ font-size:16px; }
+    .page-body{ font-size:10px; } .two{ grid-template-columns:1fr; grid-auto-rows:1fr; }
+    .page-meta{ font-size:7.5px; }
+  }
+</style>
+</head>
+<body class="book-body">
+
+<button class="book-close" onclick="window.location.href='index.html'">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Back
+</button>
+<button class="book-theme" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+  <svg class="sun-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle class="sun" cx="12" cy="12" r="5"/>
+    <path class="moon" d="M12 3a9 9 0 1 0 9 9c-4 0-7-3-7-7 0-1 .2-2 .7-3z"/>
+    <g class="rays">
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </g>
+  </svg>
+</button>
+
+<div class="book-stage">
+  <div class="book-header">
+    <p>Digital Portfolio</p>
+    <h1>Ayesh Alawaisheh</h1>
+    <p>Architecture — Research — Practice</p>
+  </div>
+  <div class="book-hint">Drag the page corners, use the arrows, or tap a Contents entry to jump</div>
+
+  <div id="flipbook">
+
+    <!-- ============ 00 COVER ============ -->
+    <div class="page page--cover" data-page="0">
+      <div class="cover-num">Portfolio — 2026</div>
+      <div class="page-mono">Ayesh Alawaisheh — Architectural Portfolio</div>
+      <h1>Where structure<br>becomes <em>place.</em></h1>
+      <p>Architecture student at the University of Jordan, designing spaces that respond to site, memory, and the people who use them.</p>
+    </div>
+
+    <!-- ============ 01 CONTENTS ============ -->
+    <div class="page" data-page="1">
+      <div class="page-kicker">Contents</div>
+      <h2 class="page-title">Table of Contents</h2>
+      <div class="toc">
+        <div class="toc-row" data-goto="2"><span class="toc-num">01</span><span class="toc-label">About</span><span class="toc-sub">p.03</span></div>
+        <div class="toc-row" data-goto="3"><span class="toc-num">02</span><span class="toc-label">Project 01 — The Urban Weave</span><span class="toc-sub">p.04–11</span></div>
+        <div class="toc-row" data-goto="11"><span class="toc-num">03</span><span class="toc-label">Project 02 — Composure</span><span class="toc-sub">p.12–18</span></div>
+        <div class="toc-row" data-goto="18"><span class="toc-num">04</span><span class="toc-label">Project 03 — The Red Mark</span><span class="toc-sub">p.19–29</span></div>
+        <div class="toc-row" data-goto="29"><span class="toc-num">05</span><span class="toc-label">Project 04 — Back to Modernity</span><span class="toc-sub">p.30–39</span></div>
+        <div class="toc-row" data-goto="39"><span class="toc-num">06</span><span class="toc-label">Project 05 — NUZUL Ecolodge</span><span class="toc-sub">p.40–45</span></div>
+        <div class="toc-row" data-goto="45"><span class="toc-num">07</span><span class="toc-label">Recognition</span><span class="toc-sub">p.46</span></div>
+        <div class="toc-row" data-goto="46"><span class="toc-num">08</span><span class="toc-label">Contact</span><span class="toc-sub">p.47</span></div>
+      </div>
+    </div>
+
+    <!-- ============ 02 ABOUT ============ -->
+    <div class="page" data-page="2">
+      <div class="page-kicker">About</div>
+      <h2 class="page-title">A way of designing,<br>not just a set of drawings.</h2>
+      <div class="page-body">
+        <p style="margin:0 0 10px;">I approach architecture through <b>research first</b> — reading site, community, and material before reaching for form. From studio work to international workshops, that habit shapes everything I design.</p>
+        <p style="margin:0 0 10px;">Every project starts with the site's own conditions — climate, material, and the people who will use the space — before any form takes shape. This research-led habit extends from a professional internship to teaching juniors.</p>
+        <p style="margin:0;">Competitions, charrettes, and workshops across Jordan, Italy, and beyond — always searching for design that serves the people around it.</p>
+      </div>
+      <div class="shim"></div>
+      <div class="row grow"><div class="fig contain"><img src="ayesh-portrait.webp" alt="Ayesh Alawaisheh portrait"></div></div>
+    </div>
+
+    <!-- ============ PROJECT 01 — THE URBAN WEAVE ============ -->
+    <div class="page" data-page="3">
+      <div class="page-kicker">Project 01 · Urban Masterplan</div>
+      <h2 class="page-title"><small>Transport &amp; Public Hub</small>The Urban Weave</h2>
+      <div class="page-body">Reconfigures As-Salt's primary urban gateway — a chaotic, fragmented transport node — into a structured, human-centered hub. A layered system organizes buses, vending activity, and public social space, supporting the city's growth and upcoming BRT development.</div>
+      <div class="page-index">
+        <span><b>Location</b> As-Salt, Jordan</span>
+        <span><b>Type</b> Urban / Transport Hub</span>
+        <span><b>Year</b> 2024 — present</span>
+        <span><b>Pages</b> 04—11</span>
+      </div>
+      <div class="opener-hero row grow"><div class="fig cover"><img src="hero-urban-weave.webp" alt="Urban Weave aerial view"></div></div>
+    </div>
+
+    <div class="page" data-page="4">
+      <div class="page-kicker">Urban Weave — Site Analysis</div>
+      <h2 class="page-title"><small>Context</small>Site Location &amp; Context</h2>
+      <div class="two">
+        <div class="fig contain"><img src="salt-road.webp" alt="Accessibility analysis"><span class="fig-cap">Accessibility — movement routes</span></div>
+        <div class="fig contain"><img src="salt-salt.webp" alt="Functional analysis"><span class="fig-cap">Functional distribution</span></div>
+      </div>
+      <div class="page-body" style="margin-top:10px;">The site sits at Al-Salt's northern gateway, near Ain Al-Jadour, where movement routes, transport, commerce, and daily life converge without clear spatial structure.</div>
+    </div>
+
+    <div class="page" data-page="5">
+      <div class="page-kicker">Urban Weave — Site Analysis</div>
+      <h2 class="page-title"><small>Analysis</small>Environment &amp; Urban Studies</h2>
+      <div class="two">
+        <div class="fig contain"><img src="salt-map.webp" alt="Administrative boundaries"><span class="fig-cap">Administrative boundaries</span></div>
+        <div class="fig contain"><img src="solar.webp" alt="Solar analysis"><span class="fig-cap">Solar analysis</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="social.webp" alt="Social analysis"><span class="fig-cap">Social analysis</span></div>
+        <div class="fig contain"><img src="history.webp" alt="Historical analysis"><span class="fig-cap">Historical context</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="6">
+      <div class="page-kicker">Urban Weave — Morphology</div>
+      <h2 class="page-title"><small>Evolution</small>Urban Morphology</h2>
+      <div class="two">
+        <div class="fig contain"><img src="morph-1.webp" alt="Morphology 1"><span class="tp">01 Site</span></div>
+        <div class="fig contain"><img src="morph-2.webp" alt="Morphology 2"><span class="tp">02 Main mass</span></div>
+      </div>
+      <div class="two" style="margin-top:10px;">
+        <div class="fig contain"><img src="morph-3.webp" alt="Morphology 3"><span class="tp">03 Main axis</span></div>
+        <div class="fig contain"><img src="morph-4.webp" alt="Morphology 4"><span class="tp">04 Subtraction</span></div>
+      </div>
+      <div class="two" style="margin-top:10px;">
+        <div class="fig contain"><img src="morph-5.webp" alt="Morphology 5"><span class="tp">05 Addition</span></div>
+        <div class="fig contain"><img src="morph-6.webp" alt="Morphology 6"><span class="tp">06 Circulation</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="7">
+      <div class="page-kicker">Urban Weave — Visuals</div>
+      <h2 class="page-title"><small>Materiality</small>Design Expression</h2>
+      <div class="row grow"><div class="fig cover"><img src="urban-bridge.webp" alt="Pedestrian bridge"><span class="fig-cap">Pedestrian bridge to corniche level</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig cover"><img src="urban-ground-floor.webp" alt="Ground floor Salti style"><span class="fig-cap">Ground floor — traditional Salti arcades</span></div></div>
+    </div>
+
+    <div class="page" data-page="8">
+      <div class="page-kicker">Urban Weave — Visuals</div>
+      <h2 class="page-title"><small>Spaces</small>Public &amp; Commercial</h2>
+      <div class="two">
+        <div class="fig cover"><img src="urban-retail.webp" alt="Retail level"><span class="fig-cap">Organized retail level</span></div>
+        <div class="fig cover"><img src="urban-communal.webp" alt="Communal space"><span class="fig-cap">Communal youth space</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig contain"><img src="urban-steel.webp" alt="North glazed facade"><span class="fig-cap">North facade — steel + glazing</span></div></div>
+    </div>
+
+    <div class="page" data-page="9">
+      <div class="page-kicker">Urban Weave — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Plans</h2>
+      <div class="two">
+        <div class="fig contain"><img src="plan-site.webp" alt="Site plan"><span class="fig-cap">Site plan</span></div>
+        <div class="fig contain"><img src="plan-gf.webp" alt="Ground floor plan"><span class="fig-cap">Ground floor plan</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="plan-1st.webp" alt="First floor plan"><span class="fig-cap">First floor plan</span></div>
+        <div class="fig contain"><img src="plan-2nd.webp" alt="Second floor plan"><span class="fig-cap">Second floor plan</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="10">
+      <div class="page-kicker">Urban Weave — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Elevations &amp; Sections</h2>
+      <div class="two">
+        <div class="fig contain"><img src="elevation-front.webp" alt="Front elevation"><span class="fig-cap">Front elevation</span></div>
+        <div class="fig contain"><img src="elevation-inside.webp" alt="Interior elevation"><span class="fig-cap">Interior elevation</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="section-long.webp" alt="Longitudinal section"><span class="fig-cap">Longitudinal section</span></div>
+        <div class="fig contain"><img src="section-trans.webp" alt="Transverse section"><span class="fig-cap">Transverse section</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PROJECT 02 — COMPOSURE ============ -->
+    <div class="page" data-page="11">
+      <div class="page-kicker">Project 02 · Academic / Medical</div>
+      <h2 class="page-title"><small>Center of Excellence</small>Composure</h2>
+      <div class="page-body">A single building holds two contrasting lives: the calm, clear, monolithic OSCE suites for medical students, and the adventurous, tectonic, high-tech lecture spaces of glass and steel for everyone else.</div>
+      <div class="page-index">
+        <span><b>Location</b> Amman, Jordan</span>
+        <span><b>Type</b> Academic / Medical</span>
+        <span><b>Year</b> 2024</span>
+        <span><b>Pages</b> 12—18</span>
+      </div>
+      <div class="opener-hero row grow"><div class="fig cover"><img src="composure-hero.webp" alt="Composure perspective"></div></div>
+    </div>
+
+    <div class="page" data-page="12">
+      <div class="page-kicker">Composure — Morphology</div>
+      <h2 class="page-title"><small>Evolution</small>Design Morphology</h2>
+      <div class="three">
+        <div class="fig contain"><img src="composure-morph-1.webp" alt="Morph 1"><span class="tp">01 Site</span></div>
+        <div class="fig contain"><img src="composure-morph-2.webp" alt="Morph 2"><span class="tp">02 Main mass</span></div>
+        <div class="fig contain"><img src="composure-morph-3.webp" alt="Morph 3"><span class="tp">03 Axis</span></div>
+      </div>
+      <div class="three" style="margin-top:10px;">
+        <div class="fig contain"><img src="composure-morph-4.webp" alt="Morph 4"><span class="tp">04 Subtraction</span></div>
+        <div class="fig contain"><img src="composure-morph-5.webp" alt="Morph 5"><span class="tp">05 Additions</span></div>
+        <div class="fig contain"><img src="composure-morph-6.webp" alt="Morph 6"><span class="tp">06 Final mass</span></div>
+      </div>
+      <div class="three" style="margin-top:10px;">
+        <div class="fig contain"><img src="composure-morph-7.webp" alt="Morph 7"><span class="tp">07 Cores</span></div>
+        <div class="fig contain"><img src="composure-morph-8.webp" alt="Morph 8"><span class="tp">08 Circulation</span></div>
+        <div class="fig contain"><img src="composure-morph-9.webp" alt="Morph 9"><span class="tp">09 3D isometric</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="13">
+      <div class="page-kicker">Composure — Visuals</div>
+      <h2 class="page-title"><small>Materiality</small>Tectonic Expression</h2>
+      <div class="row grow"><div class="fig cover"><img src="composure-batal.webp" alt="Tectonic facade"><span class="fig-cap">Tectonic facade — students' syntax</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig cover"><img src="composure-arial.webp" alt="Aerial view"><span class="fig-cap">Aerial urban context</span></div></div>
+    </div>
+
+    <div class="page" data-page="14">
+      <div class="page-kicker">Composure — Visuals</div>
+      <h2 class="page-title"><small>Spaces</small>Duality of Use</h2>
+      <div class="two">
+        <div class="fig cover"><img src="composure-layer60.webp" alt="Rear elevation"><span class="fig-cap">Rear — monolithic concrete mass</span></div>
+        <div class="fig contain"><img src="composure-syntax.webp" alt="Central gathering space"><span class="fig-cap">Central gathering space</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="composure-entrance.webp" alt="Entrance"><span class="fig-cap">Entrance — dual circulation</span></div>
+        <div class="fig cover"><img src="composure-stairs.webp" alt="Stairs close-up"><span class="fig-cap">Stairs — concrete vs steel</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="15">
+      <div class="page-kicker">Composure — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Plans</h2>
+      <div class="two">
+        <div class="fig contain"><img src="composure-dwg-site.webp" alt="Site plan"><span class="fig-cap">Site plan</span></div>
+        <div class="fig contain"><img src="composure-dwg-gf.webp" alt="Ground floor plan"><span class="fig-cap">Ground floor plan</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig contain"><img src="composure-dwg-1st.webp" alt="First floor plan"><span class="fig-cap">First floor plan</span></div></div>
+    </div>
+
+    <div class="page" data-page="16">
+      <div class="page-kicker">Composure — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Elevations &amp; Sections</h2>
+      <div class="row grow"><div class="fig contain"><img src="composure-dwg-front.webp" alt="Front elevation"><span class="fig-cap">Front elevation</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig contain"><img src="composure-dwg-back.webp" alt="Back elevation"><span class="fig-cap">Back elevation — ramp &amp; service</span></div></div>
+    </div>
+
+    <div class="page" data-page="17">
+      <div class="page-kicker">Composure — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Sections</h2>
+      <div class="row grow"><div class="fig contain"><img src="composure-dwg-longsec.webp" alt="Longitudinal section"><span class="fig-cap">Longitudinal section</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig contain"><img src="composure-dwg-transsec.webp" alt="Transverse section"><span class="fig-cap">Transverse section</span></div></div>
+    </div>
+
+    <!-- ============ PROJECT 03 — THE RED MARK ============ -->
+    <div class="page" data-page="18">
+      <div class="page-kicker">Project 03 · Campus Masterplan</div>
+      <h2 class="page-title"><small>Integrated Artery Framework</small>The Red Mark</h2>
+      <div class="page-body">A strategic framework that treats campus circulation as a high-visibility living pulse — a continuous red arterial path from redefined gateways to a revitalized Science Court, turning dormant transition zones into social hubs.</div>
+      <div class="page-index">
+        <span><b>Location</b> University of Jordan</span>
+        <span><b>Type</b> Campus Masterplan</span>
+        <span><b>Year</b> 2025</span>
+        <span><b>Pages</b> 19—29</span>
+      </div>
+      <div class="opener-hero row grow"><div class="fig contain"><img src="redmark-site-plan.webp" alt="Red Mark site plan"></div></div>
+    </div>
+
+    <div class="page" data-page="19">
+      <div class="page-kicker">Red Mark — Analysis</div>
+      <h2 class="page-title"><small>Layers</small>Site Forces &amp; Axis</h2>
+      <div class="two">
+        <div class="fig contain"><img src="redmark-layer-1.webp" alt="Layer 1 initial analysis"><span class="fig-cap">Initial analysis &amp; axis</span></div>
+        <div class="fig contain"><img src="redmark-layer-4.webp" alt="Layer 4 spatial separation"><span class="fig-cap">Spatial separation</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig contain"><img src="redmark-layer-5.webp" alt="Layer 5 working space"><span class="fig-cap">Working space articulation</span></div></div>
+    </div>
+
+    <div class="page" data-page="20">
+      <div class="page-kicker">Red Mark — Science Court</div>
+      <h2 class="page-title"><small>Village</small>Science Court Redesign</h2>
+      <div class="row grow"><div class="fig cover"><img src="redmark-village-3d.webp" alt="Village 3D"><span class="fig-cap">Village 3D visualization</span></div></div>
+      <div class="page-body" style="margin-top:10px;">Modular metal kiosks, flexible seating, and the surgical red-painting of the Geology building's perforated brick facade anchor the new social hub.</div>
+    </div>
+
+    <div class="page" data-page="21">
+      <div class="page-kicker">Red Mark — Science Court</div>
+      <h2 class="page-title"><small>Existing / Proposed</small>Court Views</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-vg1.webp" alt="Existing view 1"><span class="fig-cap">Existing — view 1</span></div>
+        <div class="fig cover"><img src="redmark-vg2.webp" alt="Existing view 2"><span class="fig-cap">Existing — view 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-vg3.webp" alt="Existing view 3"><span class="fig-cap">Existing — view 3</span></div>
+        <div class="fig cover"><img src="redmark-vg4.webp" alt="Existing view 4"><span class="fig-cap">Existing — view 4</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="22">
+      <div class="page-kicker">Red Mark — Science Court</div>
+      <h2 class="page-title"><small>Intervention</small>Court Interventions</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-village-test.webp" alt="Village test view"><span class="fig-cap">Village test view</span></div>
+        <div class="fig cover"><img src="redmark-village-perf.webp" alt="Perforated facade"><span class="fig-cap">Perforated brick facade</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig contain"><img src="redmark-village-plan.webp" alt="Village plan"><span class="fig-cap">Village plan layout</span></div></div>
+    </div>
+
+    <div class="page" data-page="23">
+      <div class="page-kicker">Red Mark — Biology Plaza</div>
+      <h2 class="page-title"><small>Plaza</small>Biology Plaza</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-bio1.webp" alt="Biology existing 1"><span class="fig-cap">Biology — existing 1</span></div>
+        <div class="fig cover"><img src="redmark-bio2.webp" alt="Biology existing 2"><span class="fig-cap">Biology — existing 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-court-3d-1.webp" alt="Red court 3D 1"><span class="fig-cap">Red Court — perspective 1</span></div>
+        <div class="fig cover"><img src="redmark-court-3d-3.webp" alt="Red court 3D 2"><span class="fig-cap">Red Court — perspective 2</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="24">
+      <div class="page-kicker">Red Mark — Biology Plaza</div>
+      <h2 class="page-title"><small>Detailing</small>Plaza Details</h2>
+      <div class="row grow"><div class="fig cover"><img src="redmark-image-1.webp" alt="Detailed view"><span class="fig-cap">Detailed intervention view</span></div></div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-scene-7.webp" alt="Scene 7"><span class="fig-cap">Spatial experience</span></div>
+        <div class="fig contain"><img src="redmark-court-plan.webp" alt="Red court plan"><span class="fig-cap">Red Court plan</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="25">
+      <div class="page-kicker">Red Mark — The Red Link</div>
+      <h2 class="page-title"><small>Artery</small>The Red Link</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-link-1.webp" alt="Link existing 1"><span class="fig-cap">Existing — 1</span></div>
+        <div class="fig cover"><img src="redmark-link-2.webp" alt="Link existing 2"><span class="fig-cap">Existing — 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-link-3.webp" alt="Link existing 3"><span class="fig-cap">Existing — 3</span></div>
+        <div class="fig cover"><img src="redmark-sol-1.webp" alt="Solution 1"><span class="fig-cap">Solution — 1</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="26">
+      <div class="page-kicker">Red Mark — The Red Link</div>
+      <h2 class="page-title"><small>Solutions</small>Artery Interventions</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-sol-2.webp" alt="Solution 2"><span class="fig-cap">Solution — 2</span></div>
+        <div class="fig cover"><img src="redmark-sol-3.webp" alt="Solution 3"><span class="fig-cap">Solution — 3</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-3d-it.webp" alt="3D IT Faculty"><span class="fig-cap">IT Faculty red skin</span></div>
+        <div class="fig contain"><img src="redmark-layer-12.webp" alt="The Path Mark"><span class="fig-cap">The Path Mark</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="27">
+      <div class="page-kicker">Red Mark — The Red Entrances</div>
+      <h2 class="page-title"><small>Gateways</small>Entrances &amp; Parking</h2>
+      <div class="two">
+        <div class="fig contain"><img src="redmark-parking-plan.webp" alt="Parking plan"><span class="fig-cap">Multi-storey parking — Science Gate</span></div>
+        <div class="fig cover"><img src="redmark-gate-red.webp" alt="Red Gate detail"><span class="fig-cap">Red Gate — Engineering entrance</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig cover"><img src="redmark-gate-3d.webp" alt="Red Gate 3D"><span class="fig-cap">Red Gate 3D</span></div></div>
+    </div>
+
+    <div class="page" data-page="28">
+      <div class="page-kicker">Red Mark — The Red Identity</div>
+      <h2 class="page-title"><small>Furniture</small>A Unified Language</h2>
+      <div class="two">
+        <div class="fig cover"><img src="redmark-layer-14.webp" alt="Furniture 1"><span class="tp">Element 1</span></div>
+        <div class="fig cover"><img src="redmark-layer-15.webp" alt="Furniture 2"><span class="tp">Element 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="redmark-layer-16.webp" alt="Furniture 3"><span class="tp">Element 3</span></div>
+        <div class="fig cover"><img src="redmark-layer-17.webp" alt="Furniture 4"><span class="tp">Element 4</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PROJECT 04 — BACK TO MODERNITY ============ -->
+    <div class="page" data-page="29">
+      <div class="page-kicker">Project 04 · Library / Cultural</div>
+      <h2 class="page-title"><small>Amman · 3,000 m²</small>Back to Modernity</h2>
+      <div class="page-body">A study of Richard Meier's principles — geometric order, proportion, light, and the relationship between solid and void — carried consistently from overall composition to the smallest details.</div>
+      <div class="page-index">
+        <span><b>Location</b> Amman, Jordan</span>
+        <span><b>Type</b> Library / Cultural</span>
+        <span><b>Area</b> 3,000 m²</span>
+        <span><b>Pages</b> 30—39</span>
+      </div>
+      <div class="opener-hero row grow"><div class="fig cover"><img src="modernity-hero.webp" alt="Modernity primary perspective"></div></div>
+    </div>
+
+    <div class="page" data-page="30">
+      <div class="page-kicker">Modernity — Concept</div>
+      <h2 class="page-title"><small>Massing</small>Concept &amp; Program</h2>
+      <div class="two">
+        <div class="fig cover"><img src="modernity-mass-concept.webp" alt="Conceptual mass"><span class="tp">01 Conceptual mass</span></div>
+        <div class="fig cover"><img src="modernity-mass-nassing.webp" alt="Conceptual massing"><span class="tp">02 Massing</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-morphology.webp" alt="Morphology"><span class="tp">03 Morphology</span></div>
+        <div class="fig contain"><img src="modernity-program.webp" alt="Stacked program"><span class="tp">04 Stacked program</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="31">
+      <div class="page-kicker">Modernity — Visuals</div>
+      <h2 class="page-title"><small>Perspectives</small>Design Perspectives</h2>
+      <div class="two">
+        <div class="fig cover"><img src="modernity-pers-2.webp" alt="Perspective 2"><span class="tp">Perspective 1</span></div>
+        <div class="fig cover"><img src="modernity-pers-3.webp" alt="Perspective 3"><span class="tp">Perspective 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig cover"><img src="modernity-pers-4.webp" alt="Perspective 4"><span class="tp">Perspective 3</span></div>
+        <div class="fig cover"><img src="modernity-pers-5.webp" alt="Perspective 5"><span class="tp">Perspective 4</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="32">
+      <div class="page-kicker">Modernity — Visuals</div>
+      <h2 class="page-title"><small>3D</small>Three-Dimensional Views</h2>
+      <div class="two">
+        <div class="fig contain"><img src="modernity-3d-1.webp" alt="3D view 1"><span class="tp">3D — 1</span></div>
+        <div class="fig contain"><img src="modernity-3d-2.webp" alt="3D view 2"><span class="tp">3D — 2</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-3d-3.webp" alt="3D view 3"><span class="tp">3D — 3</span></div>
+        <div class="fig contain"><img src="modernity-3d-4.webp" alt="3D view 4"><span class="tp">3D — 4</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="33">
+      <div class="page-kicker">Modernity — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Floor Plans</h2>
+      <div class="two">
+        <div class="fig contain"><img src="modernity-plan-gf.webp" alt="Ground floor plan"><span class="fig-cap">Ground floor plan</span></div>
+        <div class="fig contain"><img src="modernity-plan-first.webp" alt="First floor plan"><span class="fig-cap">First floor plan</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-plan-second.webp" alt="Second floor plan"><span class="fig-cap">Second floor plan</span></div>
+        <div class="fig contain"><img src="modernity-plan-site.webp" alt="Site plan"><span class="fig-cap">Site plan</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="34">
+      <div class="page-kicker">Modernity — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Elevations &amp; Sections</h2>
+      <div class="two">
+        <div class="fig contain"><img src="modernity-elev-north.webp" alt="North elevation"><span class="fig-cap">North elevation</span></div>
+        <div class="fig contain"><img src="modernity-elev-south.webp" alt="South elevation"><span class="fig-cap">South elevation</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-elev-west.webp" alt="West elevation"><span class="fig-cap">West elevation</span></div>
+        <div class="fig contain"><img src="modernity-elev-east.webp" alt="East elevation"><span class="fig-cap">East elevation</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="35">
+      <div class="page-kicker">Modernity — Drawings</div>
+      <h2 class="page-title"><small>Technical</small>Sections</h2>
+      <div class="row grow"><div class="fig contain"><img src="modernity-section.webp" alt="Section"><span class="fig-cap">Section</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig contain"><img src="modernity-syntax-section.webp" alt="Syntax in section"><span class="fig-cap">Syntax in section</span></div></div>
+    </div>
+
+    <div class="page" data-page="36">
+      <div class="page-kicker">Modernity — Analysis</div>
+      <h2 class="page-title"><small>Proportions</small>Geometric Order</h2>
+      <div class="two">
+        <div class="fig contain"><img src="modernity-prop-plan.webp" alt="Proportions in plans"><span class="fig-cap">Proportions — plans</span></div>
+        <div class="fig contain"><img src="modernity-prop-north.webp" alt="North proportions"><span class="fig-cap">Proportions — north</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-prop-south.webp" alt="South proportions"><span class="fig-cap">Proportions — south</span></div>
+        <div class="fig contain"><img src="modernity-prop-east.webp" alt="East proportions"><span class="fig-cap">Proportions — east</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="37">
+      <div class="page-kicker">Modernity — Analysis</div>
+      <h2 class="page-title"><small>Public &amp; Private</small>Zoning &amp; Solid-Void</h2>
+      <div class="two">
+        <div class="fig contain"><img src="modernity-pp-gf.webp" alt="Public private GF"><span class="fig-cap">Public / private — GF</span></div>
+        <div class="fig contain"><img src="modernity-pp-first.webp" alt="Public private 1st"><span class="fig-cap">Public / private — 1st</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="modernity-pp-second.webp" alt="Public private 2nd"><span class="fig-cap">Public / private — 2nd</span></div>
+        <div class="fig contain"><img src="modernity-pp-section.webp" alt="Public private section"><span class="fig-cap">Public / private — section</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="38">
+      <div class="page-kicker">Modernity — Analysis</div>
+      <h2 class="page-title"><small>Composition</small>Solid Additions &amp; Axis</h2>
+      <div class="row grow"><div class="fig contain"><img src="modernity-solid-additions.webp" alt="Solid additions"><span class="fig-cap">Solid additions</span></div></div>
+      <div class="row" style="margin-top:12px;"><div class="fig contain"><img src="modernity-axis-syntax.webp" alt="Axis and syntax"><span class="fig-cap">Axis &amp; syntax</span></div></div>
+    </div>
+
+    <!-- ============ PROJECT 05 — NUZUL ============ -->
+    <div class="page" data-page="39">
+      <div class="page-kicker">Project 05 · Ecolodge / Hospitality</div>
+      <h2 class="page-title"><small>Iraq al-Amir</small>NUZUL — نُزُل</h2>
+      <div class="page-body">Draws from the vernacular spirit of Iraq al-Amir, embracing in-between spaces and thresholds as moments to slow the pace — inviting pause, reflection, and sensory awareness through tactile tectonics and a human-scaled layout.</div>
+      <div class="page-index">
+        <span><b>Location</b> Iraq al-Amir, Jordan</span>
+        <span><b>Type</b> Ecolodge</span>
+        <span><b>Concept</b> Vernacular + Threshold</span>
+        <span><b>Pages</b> 40—45</span>
+      </div>
+      <div class="opener-hero row grow"><div class="fig cover"><img src="nuzul-hero.webp" alt="NUZUL main open space"></div></div>
+    </div>
+
+    <div class="page" data-page="40">
+      <div class="page-kicker">NUZUL — Visuals</div>
+      <h2 class="page-title"><small>Thresholds</small>In-Between Spaces</h2>
+      <div class="two">
+        <div class="fig cover"><img src="nuzul-inbetween.webp" alt="In-between spaces"><span class="fig-cap">In-between spaces</span></div>
+        <div class="fig cover"><img src="nuzul-perf-wall.webp" alt="Perforated screen"><span class="fig-cap">Filtered light — perforated screen</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig cover"><img src="nuzul-scene-11.webp" alt="Suite interior"><span class="fig-cap">Interior design of the suites</span></div></div>
+    </div>
+
+    <div class="page" data-page="41">
+      <div class="page-kicker">NUZUL — Visuals</div>
+      <h2 class="page-title"><small>Courtyards</small>Lawns &amp; Approach</h2>
+      <div class="two">
+        <div class="fig cover"><img src="nuzul-lawns.webp" alt="Courtyard lawns"><span class="fig-cap">Courtyard lawns</span></div>
+        <div class="fig cover"><img src="nuzul-multi-prop.webp" alt="Path to multipurpose hall"><span class="fig-cap">Path to the multi-purpose hall</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="42">
+      <div class="page-kicker">NUZUL — Drawings</div>
+      <h2 class="page-title"><small>Site &amp; Plans</small>Layout</h2>
+      <div class="two">
+        <div class="fig contain"><img src="nuzul-site.webp" alt="Site plan"><span class="fig-cap">Site plan</span></div>
+        <div class="fig contain"><img src="nuzul-gf.webp" alt="Ground floor plan"><span class="fig-cap">Ground floor plan</span></div>
+      </div>
+      <div class="row grow" style="margin-top:12px;"><div class="fig contain"><img src="nuzul-first.webp" alt="First floor plan"><span class="fig-cap">First floor plan</span></div></div>
+    </div>
+
+    <div class="page" data-page="43">
+      <div class="page-kicker">NUZUL — Drawings</div>
+      <h2 class="page-title"><small>Elevations &amp; Studies</small>Views</h2>
+      <div class="two">
+        <div class="fig contain"><img src="nuzul-north-elev.webp" alt="Northern elevation"><span class="fig-cap">Northern elevation</span></div>
+        <div class="fig contain"><img src="nuzul-south-shot.webp" alt="Southern view study"><span class="fig-cap">Southern view study</span></div>
+      </div>
+    </div>
+
+    <div class="page" data-page="44">
+      <div class="page-kicker">NUZUL — Drawings</div>
+      <h2 class="page-title"><small>Sections</small>Sections &amp; Analysis</h2>
+      <div class="two">
+        <div class="fig contain"><img src="nuzul-section.webp" alt="Section"><span class="fig-cap">Section</span></div>
+        <div class="fig contain"><img src="nuzul-section-alt.webp" alt="Section study"><span class="fig-cap">Section study</span></div>
+      </div>
+      <div class="two" style="margin-top:12px;">
+        <div class="fig contain"><img src="nuzul-detailed-section.webp" alt="Detailed section"><span class="fig-cap">Detailed section</span></div>
+        <div class="fig contain"><img src="nuzul-wind.webp" alt="Wind analysis"><span class="fig-cap">Wind analysis</span></div>
+      </div>
+    </div>
+
+    <!-- ============ RECOGNITION ============ -->
+    <div class="page" data-page="45">
+      <div class="page-kicker">Recognition</div>
+      <h2 class="page-title">Competitions &amp; honors.</h2>
+      <div class="page-body">
+        <p style="margin:0 0 12px;">"Water as a Catalyzer" earned an <b>Honorable Mention</b> at the UMAR Summer School competition for reimagining Gaza's sea port through water-driven urban design.</p>
+        <p style="margin:0 0 12px;"><b>University of Jordan Student Union</b> — selected as one of eight student representatives for the Faculty of Engineering, leading a departmental redesign proposal that was funded and built with the JEA.</p>
+        <p style="margin:0;">Selected as one of <b>eight student representatives</b> for the Faculty of Engineering — leading a redesign proposal funded and built with the JEA.</p>
+      </div>
+      <div class="page-meta"><span><b>UMAR</b>2024</span><span><b>UJ</b>2024—2026</span></div>
+    </div>
+
+    <!-- ============ CONTACT ============ -->
+    <div class="page" data-page="46">
+      <div class="page-kicker">Contact</div>
+      <h2 class="page-title">Let's build something grounded.</h2>
+      <div class="page-body" style="margin-bottom:14px;">Open to internships, collaborations, and design conversations — based in As-Salt, studying in Amman.</div>
+      <ul class="page-list">
+        <li><b>Email</b> — ayeshawaisheh@gmail.com</li>
+        <li><b>Phone / WhatsApp</b> — +962 790 915 910</li>
+        <li><b>Location</b> — As-Salt, Jordan</li>
+        <li><b>Studio</b> — University of Jordan, Amman</li>
+      </ul>
+      <div class="page-meta"><span><b>Email</b>ayeshawaisheh@gmail.com</span><span><b>Phone</b>+962 790 915 910</span></div>
+    </div>
+
+    <!-- ============ BACK COVER ============ -->
+    <div class="page page--back" data-page="47">
+      <div class="page-mono">Thank you for reading.</div>
+      <div class="page-small">Ayesh Alawaisheh © 2026 — As-Salt, Jordan</div>
+    </div>
+
+  </div>
+
+  <div class="book-controls">
+    <button class="btn-book" id="prevBtn">← Prev</button>
+    <span class="book-hint" id="pageIndicator" style="margin:0;">Page 1 / 48</span>
+    <button class="btn-book" id="nextBtn">Next →</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+<script>
+(function() {
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  var btn = document.getElementById('themeToggle');
+  btn.addEventListener('click', function() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+
+  var pages = document.querySelectorAll('#flipbook .page');
+  var total = pages.length;
+
+  var book = new St.PageFlip(document.getElementById('flipbook'), {
+    width: 490,
+    height: 693,
+    size: 'stretch',
+    minWidth: 320,
+    maxWidth: 1080,
+    maxShadowOpacity: 0.4,
+    showCover: true,
+    mobileScrollSupport: false,
+    usePortrait: false,
+    drawShadow: true,
+    flippingTime: 700,
+    startZIndex: 0,
+    autoSize: true
+  });
+  book.loadFromHTML(pages);
+
+  /* Add a printed-book footer (project tag + portfolio line) to every content page */
+  (function() {
+    var map = [
+      { from: 0,  tag: 'Cover' },
+      { from: 2,  tag: 'About' },
+      { from: 3,  tag: '01 · The Urban Weave' },
+      { from: 11, tag: '02 · Composure' },
+      { from: 18, tag: '03 · The Red Mark' },
+      { from: 29, tag: '04 · Back to Modernity' },
+      { from: 39, tag: '05 · NUZUL' },
+      { from: 45, tag: 'Recognition' },
+      { from: 46, tag: 'Contact' }
+    ];
+    function tagFor(i) { var t = 'Ayesh Alawaisheh'; for (var k = map.length - 1; k >= 0; k--) { if (i >= map[k].from) { t = map[k].tag; break; } } return t; }
+
+    [].forEach.call(pages, function(pg) {
+      var idx = parseInt(pg.getAttribute('data-page'), 10);
+      if (pg.classList.contains('page--cover') || pg.classList.contains('page--back')) return;
+      var foot = document.createElement('div');
+      foot.className = 'page-footer';
+      foot.innerHTML =
+        '<span class="foot-left"><span class="foot-dot">◆</span>Ayesh Alawaisheh — Architectural Portfolio</span>' +
+        '<span class="foot-tag">' + tagFor(idx) + '</span>';
+      pg.appendChild(foot);
+    });
+  })();
+
+  document.querySelectorAll('.toc-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var target = parseInt(row.getAttribute('data-goto'), 10);
+      if (!isNaN(target) && target >= 0 && target < total) book.flip(target);
+    });
+  });
+
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var indicator = document.getElementById('pageIndicator');
+  function updateControls(state) {
+    if (indicator) indicator.textContent = 'Page ' + (state + 1) + ' / ' + total;
+    if (prevBtn) prevBtn.disabled = state === 0;
+    if (nextBtn) nextBtn.disabled = state >= total - 1;
+  }
+  if (prevBtn) prevBtn.addEventListener('click', function() { book.flipPrev(); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { book.flipNext(); });
+  book.on('flip', function(e) { if (e && typeof e.data === 'number') updateControls(e.data); });
+  book.on('changeState', function(e) { if (e && e.data === 'read') updateControls(book.getCurrentPageIndex()); });
+  setTimeout(function() { updateControls(book.getCurrentPageIndex()); }, 200);
+  window.addEventListener('resize', function() { if (book) book.update(); });
+})();
+</script>
+</body>
+</html>
