@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field Notes — Experience &amp; Activities | Ayesh Alawaisheh</title>
+  <meta name="description" content="The lived side of the portfolio — internship at Panorama Consulting Engineers, UCAN and UMAR international workshops, and student leadership at the University of Jordan.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="project-style.css">
+  <style>
+    .video-box {
+      position: relative; border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; cursor: pointer; line-height: 0;
+    }
+    .video-box .preview { width: 100%; height: auto; display: block; }
+    .video-box .play-badge {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.05));
+      transition: background .25s ease;
+    }
+    .video-box:hover .play-badge { background: rgba(0,0,0,0.28); }
+    .play-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(255,255,255,0.92); color: #131417;
+      font-size: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+      transition: transform .25s ease;
+    }
+    .video-box:hover .play-circle { transform: scale(1.08); }
+    .play-tag {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em;
+      text-transform: uppercase; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+      padding: 6px 12px; border: 1px solid rgba(255,255,255,0.5); border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+    }
+    .video-modal {
+      display: none; position: fixed; inset: 0; z-index: 10001;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+      padding: 24px; cursor: pointer;
+    }
+    .video-modal video {
+      max-width: min(94vw, 480px); max-height: 88vh; width: 100%;
+      border-radius: 10px; background: #000; cursor: default;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.6);
+    }
+    .exp-kicker {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.22em;
+      color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; display: block;
+    }
+    .exp-lead { font-size: 17px; line-height: 1.75; color: var(--text-soft); }
+    .exp-lead strong { color: var(--text); font-weight: 600; }
+    .timeline-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;
+    }
+    @media (max-width: 700px) { .timeline-strip { grid-template-columns: repeat(2, 1fr); } }
+    .tl-item { border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; }
+    .tl-year { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 600; }
+    .tl-text { font-size: 12px; color: var(--text-soft); line-height: 1.5; margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Nav -->
+  <div class="nav-outer">
+    <nav class="pill">
+      <a href="index.html#work" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> <span>Portfolio</span>
+      </a>
+      <div class="nav-project-tag mono">FIELD NOTES / ARCHIVE</div>
+      <a href="book.html" class="nav-book-btn" title="Open digital flip book">Book
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+        <svg class="sun-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle class="sun" cx="12" cy="12" r="5"/>
+          <path class="moon" d="M12 3a9 9 0 1 0 9 9c-4 0-7-3-7-7 0-1 .2-2 .7-3z"/>
+          <g class="rays">
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </g>
+        </svg>
+      </button>
+    </nav>
+  </div>
+
+  <main class="wrap">
+
+    <!-- ============ HERO ============ -->
+    <section class="project-hero reveal-card">
+      <div class="project-header-card bp">
+        <div class="eyebrow">EXPERIENCE &amp; ACTIVITIES // FIELD NOTES</div>
+        <h1>Beyond the studio.</h1>
+        <div class="project-subtitle">Internships, workshops, and leadership — the hours that shaped the architect.</div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Location / Site</span>
+            <span class="meta-value">Jordan · Italy</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Timeline</span>
+            <span class="meta-value">2021 — 2026</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Field</span>
+            <span class="meta-value">Practice · Workshops · Leadership</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Software &amp; Tools</span>
+            <span class="meta-value">Revit, AutoCAD, Rhino 3D, D5 Render, Enscape</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image-wrap bp">
+        <img src="experience-media/hero.webp" alt="A field moment from Ayesh Alawaisheh's experience archive" class="hero-img">
+        <div class="hero-fade"></div>
+      </div>
+    </section>
+
+    <!-- ============ 00 · THE IDEA ============ -->
+    <section class="section-card bp reveal-card">
+      <div class="eyebrow">00 · THE IDEA</div>
+      <h2 class="section-title">An architect is made in rooms the studio never sees.</h2>
+      <p class="exp-lead">
+        This page is a loose-leaf archive — proof of the hours spent at an engineering
+        desk, around a workshop table in Italy, and in the loud rooms of the student union.
+        No single one of them produced a drawing. Together, they produced the way I think.
+        Each folder below is slotted as casually as it was lived: a proposal that got signed,
+        a square on the other side of a sea, a certificate folded into a pocket.
+      </p>
+
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-title">Practice</div>
+          <p class="pillar-text">The summer at Panorama Consulting Engineers — a villa taken from drawing set to a signed proposal, and everything learned by watching an office actually work.</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-title">Workshops</div>
+          <p class="pillar-text">UCAN in Italy and the UMAR Summer School in Amman — rooms of strangers from six countries, a heavy brief, and a submission made on tired last nights.</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-title">Leadership</div>
+          <p class="pillar-text">Tatweer, Iimar, and a two-year Dutch-funded program — the student union as a lesson in conviction, compromise, and getting the room to listen.</p>
+        </div>
+      </div>
+
+      <div class="timeline-strip">
+        <div class="tl-item">
+          <div class="tl-year">2021 — 2024</div>
+          <div class="tl-text">AL NASHAMA Bloc — organizing campaigns and student rights at the University of Jordan.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">JUL 2024</div>
+          <div class="tl-text">UMAR Summer School, "Water as a Catalyzer" — Honorable Mention, Amman.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2025</div>
+          <div class="tl-text">Design Charrette with AUS, the UCAN workshop in Brescia, and the Panorama internship.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2025 — 2026</div>
+          <div class="tl-text">Modernization Program (PSI / Dutch Embassy) and the Iimar &amp; Tatweer elections.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 · PANORAMA ============ -->
+    <section class="section-card bp reveal-card">
+      <div class="eyebrow">01 · ARCHITECTURAL PRACTICE</div>
+      <h2 class="section-title">Panorama Consulting Engineers — Intern Architect</h2>
+      <p class="exp-lead">
+        The desk at <strong>Panorama Consulting Engineers</strong> faced site visits and deadlines.
+        Over two summer months I carried residential and commercial work — most vividly the
+        <strong>Hawamdeh project</strong>, developed independently from construction documents into a
+        design the senior architect approved <em>without a single revision</em>. Coordination with civil,
+        electrical, and mechanical teams turned "drawing" from a verb into a negotiation, and the
+        general manager's door stayed open just long enough to learn how much of the job is people.
+      </p>
+
+      <table class="specs-table">
+        <tr><th>Role</th><td>Intern Architect</td></tr>
+        <tr><th>Period</th><td>Jul 2025 — Sep 2025</td></tr>
+        <tr><th>Location</th><td>Amman, Jordan</td></tr>
+        <tr><th>Focus</th><td>Construction documents, 3D visualizations, material schedules, cross-disciplinary coordination</td></tr>
+      </table>
+
+      <div class="drawings-grid" style="margin-top:24px;">
+        <div class="site-image span-full">
+          <img src="experience-media/p-gm.webp" alt="With Eng. Amer Al-Basheer, General Manager of Panorama Consulting Engineers" class="clickable-img">
+          <span class="site-image-label">With Eng. Amer Al-Basheer, General Manager of Panorama Consulting Engineers</span>
+        </div>
+        <div class="site-image">
+          <img src="experience-media/p-site-visit.webp" alt="Site visit to one of the company's projects" class="clickable-img">
+          <span class="site-image-label">Site visit — one of the company's live projects</span>
+        </div>
+        <div class="site-image">
+          <img src="experience-media/p-office.webp" alt="A day inside the office" class="clickable-img">
+          <span class="site-image-label">The office — drawings, coffee, coordination</span>
+        </div>
+      </div>
+
+      <div class="site-image-wide">
+        <img src="experience-media/p-hawamdeh.webp" alt="Hawamdeh project — final design" class="clickable-img">
+        <span class="site-image-label">Hawamdeh project — the design approved without revision</span>
+      </div>
+
+      <div class="project-grid-3col">
+        <div class="project-grid-item">
+          <img src="experience-media/p-hawamdeh-plans.webp" alt="Hawamdeh project plans" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/p-proposal-complex.webp" alt="Proposal for a complex design" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/p-proposal-2.webp" alt="Second proposal study" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Working sets and proposal studies carried through the internship</span>
+    </section>
+
+    <!-- ============ 02 · UCAN ============ -->
+    <section class="section-card bp reveal-card">
+      <div class="eyebrow">02 · INTERNATIONAL WORKSHOP</div>
+      <h2 class="section-title">UCAN — Liberty Square, Brescia, Italy</h2>
+      <p class="exp-lead">
+        Seven days in Brescia, six countries around the table, one site in Ukraine.
+        The <strong>UCAN International Workshop</strong> asked us to rebuild Liberty Square as a public
+        space while the square's namesake was being defended elsewhere. The proposal anchored
+        the new square in local heritage — rapid site research, participatory design sessions, and a
+        final submission drawn between late nights and early discussions. Cross-cultural exchange
+        was not a slide in the brief; it was the method.
+      </p>
+
+      <table class="specs-table">
+        <tr><th>Role</th><td>Active Participant</td></tr>
+        <tr><th>Period</th><td>Sep 2025</td></tr>
+        <tr><th>Location</th><td>Brescia, Italy</td></tr>
+        <tr><th>Brief</th><td>Context-sensitive public space proposal for Liberty Square, Ukraine</td></tr>
+      </table>
+
+      <div class="site-image-wide" style="margin-top:24px;">
+        <img src="experience-media/u-presenting.webp" alt="Presenting at the UCAN workshop" class="clickable-img">
+        <span class="site-image-label">Presenting the proposal mid-workshop, Brescia</span>
+      </div>
+
+      <div class="project-grid-2col">
+        <div class="project-grid-item">
+          <img src="experience-media/u-submission.webp" alt="UCAN final submission for Liberty Square" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/u-photo.webp" alt="Workshop studio moment" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Liberty Square — final submission (left), studio moment (right)</span>
+
+      <div class="project-grid-3col">
+        <div class="project-grid-item">
+          <img src="experience-media/u-team.webp" alt="UCAN participant teams" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/u-cert.webp" alt="UCAN certificate" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/u-accred-ddeyala.webp" alt="Accreditation from Dr. Deyala" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Participant teams, certificate, and accreditation from Dr. Deyala</span>
+    </section>
+
+    <!-- ============ 03 · UMAR ============ -->
+    <section class="section-card bp reveal-card">
+      <div class="eyebrow">03 · COMPETITION SUMMER SCHOOL</div>
+      <h2 class="section-title">UMAR — "Water as a Catalyzer", Honorable Mention</h2>
+      <p class="exp-lead">
+        Two weeks, a Mediterranean-wide table, and a brief to revive Gaza's sea port through
+        <strong>water as a catalyst</strong>. Hosted between the German Jordanian University and the
+        University of Birzeit, the <strong>UMAR Summer School</strong> pushed the project to an
+        <strong>Honorable Mention</strong> — a research-heavy, water-driven framework weaving infrastructure,
+        ecology, and public life back into a conflict-affected coast. The posters below are the
+        argument, pinned as much for the jury as for the memory of the site.
+      </p>
+
+      <table class="specs-table">
+        <tr><th>Role</th><td>Active Participant — Honorable Mention</td></tr>
+        <tr><th>Period</th><td>Jul 2024</td></tr>
+        <tr><th>Location</th><td>Amman, Jordan (GJU × University of Birzeit)</td></tr>
+        <tr><th>Result</th><td>Honorable Mention — Union of Mediterranean Architects (UMAR)</td></tr>
+      </table>
+
+      <div class="site-image-wide" style="margin-top:24px;">
+        <img src="experience-media/w-poster-final.webp" alt="Final UMAR competition poster" class="clickable-img">
+        <span class="site-image-label">Final board — "Water as a Catalyzer: Reviving Gaza's Sea Port"</span>
+      </div>
+
+      <div class="project-grid-2col">
+        <div class="project-grid-item">
+          <img src="experience-media/w-team.webp" alt="UMAR summer school team" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/w-presentation.webp" alt="Presenting the UMAR project" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">The team and the presentation sessions</span>
+
+      <div class="project-grid-3col">
+        <div class="project-grid-item">
+          <img src="experience-media/w-poster-work.webp" alt="UMAR project work" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/w-poster-participants.webp" alt="UMAR main poster of participants" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/w-certs.webp" alt="UMAR certificates" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Work, participant poster, and certificates</span>
+    </section>
+
+    <!-- ============ 04 · LEADERSHIP ============ -->
+    <section class="section-card bp reveal-card">
+      <div class="eyebrow">04 · LEADERSHIP &amp; UNION LIFE</div>
+      <h2 class="section-title">Elections, accreditation, and a modernization program.</h2>
+      <p class="exp-lead">
+        The serious side of student life. Between 2021 and 2026 the union was a second faculty:
+        election nights, accreditation letters, and a two-year leadership program funded by the
+        Dutch Embassy. It is where I learned that architecture shares its real subject with
+        politics — space for people, and the patience to convince them.
+      </p>
+
+      <h3 style="font-size:16px; font-weight:600; margin:28px 0 4px; color: var(--accent);">Iimar &amp; Tatweer — Student Campaign Director, 2026</h3>
+      <p class="exp-lead" style="font-size:15px; margin-top:8px;">
+        As campaign director I ran two lists at once — holding <strong>Tatweer</strong>'s incumbency while
+        building <strong>Iimar</strong> from nothing: an architecture-only slate that, against multi-department
+        coalitions, won a dedicated Faculty seat (3 of 8 seats, 660 votes) — the first single-department
+        list to reach Faculty-level representation at the University of Jordan.
+      </p>
+
+      <div class="project-grid-2col">
+        <div class="project-grid-item">
+          <img src="experience-media/le-tatweer-elections.webp" alt="Tatweer elections night" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/le-imar-members.webp" alt="Iimar campaign members post" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Election night — Tatweer (left), Iimar campaign (right)</span>
+
+      <div class="project-grid-2col">
+        <div class="project-grid-item">
+          <img src="experience-media/le-imar-poster.webp" alt="Iimar campaign poster" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/le-imar-banner.webp" alt="Iimar street banner" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Iimar — campaign poster and street banner</span>
+
+      <div class="project-grid-3col">
+        <div class="project-grid-item">
+          <img src="experience-media/le-acc-menwer.webp" alt="Accreditation from Dr. Menwer Altarakiyeh" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/le-acc-deyala.webp" alt="Accreditation from Dr. Deyala" class="clickable-img">
+        </div>
+        <div class="project-grid-item">
+          <img src="experience-media/le-acc-national.webp" alt="National accreditation" class="clickable-img">
+        </div>
+      </div>
+      <span class="site-image-label" style="margin-top:0;">Accreditations — Dr. Menwer Altarakiyeh, Dr. Deyala, and national recognition</span>
+
+      <h3 style="font-size:16px; font-weight:600; margin:28px 0 4px; color: var(--accent);">Jeel Al-Tahdith — Political Leadership Empowerment Program</h3>
+      <p class="exp-lead" style="font-size:15px; margin-top:8px;">
+        Selected for <strong>Jeel Al-Tahdith (Generation of Modernization)</strong>, a two-year PSI program
+        funded by the Dutch Embassy across ten Jordanian universities — policy paper writing, media
+        dialogue, and campaign leadership in line with the country's political modernization vision.
+        The clip below is a moment from one of the program's discussion tables.
+      </p>
+
+      <div class="project-grid-2col">
+        <div class="project-grid-item">
+          <img src="experience-media/mo-tutor.webp" alt="With a tutor at the Modernization program" class="clickable-img">
+        </div>
+        <div class="project-grid-item" style="align-self:stretch;">
+          <div class="video-box" style="height:100%; min-height:100%;" onclick="openVideo()">
+            <img class="preview" src="experience-media/mod-preview.gif" alt="Animated preview — speaking at the Modernization program discussion" style="object-fit:cover; height:100%; min-height:100%;">
+            <div class="play-badge">
+              <span class="play-circle">&#9654;</span>
+              <span class="play-tag">Watch the discussion</span>
+            </div>
+          </div>
+          <span class="site-image-label">Motion preview — animated (GIF, ~1 MB). Click to watch with sound (mp4)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Project Navigation Footer -->
+    <div class="project-nav-footer">
+      <a href="index.html#work" class="back-btn mono" style="font-size:12px; background:var(--surface); padding:14px 20px; border:1px solid var(--border); border-radius:8px;">
+        All Projects
+      </a>
+      <a href="index.html#cv" class="proj-nav-link" style="text-align:right;">
+        <span class="proj-nav-label">Curriculum Vitae <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="proj-nav-title">Education, experience, and skill</span>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap mono" style="font-size:12px;">
+      &copy; 2026 Ayesh Alawaisheh &mdash; Architectural Portfolio. All rights reserved.
+    </div>
+  </footer>
+
+<!-- VIDEO MODAL -->
+<div id="vmodal" class="video-modal" onclick="closeVideo()">
+  <video id="vplayer" controls playsinline poster="experience-media/mo-video-poster.jpg" src="experience-media/mod-video.mp4"></video>
+</div>
+
+<script>
+(function() {
+  var cards = document.querySelectorAll('.reveal-card');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      } else {
+        entry.target.classList.remove('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(function(card) { observer.observe(card); });
+})();
+</script>
+
+<div id="lightbox" class="lightbox">
+  <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+  <span class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</span>
+  <span class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">&#10095;</span>
+  <img class="lightbox-content" id="lightbox-img">
+  <span class="lightbox-counter" id="lightbox-counter"></span>
+</div>
+
+<script>
+var lightboxImages = [];
+var currentIndex = 0;
+
+document.querySelectorAll('.clickable-img').forEach(function(img, i) {
+  lightboxImages.push(img);
+  img.addEventListener('click', function(e) {
+    e.stopPropagation();
+    currentIndex = i;
+    openLightbox();
+  });
+});
+
+function openLightbox() {
+  var img = document.getElementById('lightbox-img');
+  img.classList.remove('fade-out');
+  img.src = lightboxImages[currentIndex].src;
+  document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + lightboxImages.length;
+  document.getElementById('lightbox').style.display = 'flex';
+}
+
+function navigateLightbox(dir) {
+  var img = document.getElementById('lightbox-img');
+  img.classList.add('fade-out');
+  setTimeout(function() {
+    currentIndex += dir;
+    if (currentIndex < 0) currentIndex = lightboxImages.length - 1;
+    if (currentIndex >= lightboxImages.length) currentIndex = 0;
+    img.src = lightboxImages[currentIndex].src;
+    img.classList.remove('fade-out');
+    document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + lightboxImages.length;
+  }, 200);
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('lightbox').style.display === 'flex') {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigateLightbox(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); navigateLightbox(1); }
+    if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
+  }
+});
+</script>
+
+<script>
+function openVideo() {
+  var modal = document.getElementById('vmodal');
+  var player = document.getElementById('vplayer');
+  modal.style.display = 'flex';
+  player.play().catch(function(){});
+}
+function closeVideo() {
+  var modal = document.getElementById('vmodal');
+  var player = document.getElementById('vplayer');
+  player.pause();
+  modal.style.display = 'none';
+}
+(function() {
+  var player = document.getElementById('vplayer');
+  player.addEventListener('click', function(e) { e.stopPropagation(); });
+})();
+</script>
+
+<script>
+(function() {
+  var btn = document.getElementById('themeToggle');
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  btn.addEventListener('click', function() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
+</script>
+
+</body>
+</html>
